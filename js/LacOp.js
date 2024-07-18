@@ -1,6 +1,5 @@
 /* Driver file for the LacOp project */
-import { Cell } from './cellClass';
-
+import Cell from './cellClass.js';
 
 function RunLO(mutL, plasmid, allo, lacIn, lacOut, Glu) {
     const mutations = convert_mutList_to_dict(mutL);
@@ -8,10 +7,10 @@ function RunLO(mutL, plasmid, allo, lacIn, lacOut, Glu) {
     if ("Active" in mutL) { 
         cap = "Active";
     }
-    var C = Cell(mutations, allo, lacIn, lacOut, Glu, cap);
-    if(plasmid != []){
+    var C = new Cell(mutations, allo, lacIn, lacOut, Glu, cap);
+    if(plasmid.length > 0){
         var shift = [];
-        for(let item in plasmid){
+        for(let item of plasmid){
             /////////////
             const slicedItem = item.slice(2);
             shift.push(slicedItem);
@@ -27,7 +26,7 @@ function convert_mutList_to_dict(list) {
     var mutL = {'ProMutation': null, 'BgalMutation': null,
         'RepMutation': null, 'OpMutation': null,
         'PermMutation': null};
-    for (let item in list){ 
+    for (let item of list){ 
         let sliceItem = item.slice(0,4);
         if(sliceItem != "none"){ 
             if (item == "lacP-"){
@@ -49,3 +48,6 @@ function convert_mutList_to_dict(list) {
     }
     return mutL;
 }
+
+// consider instead making a "Simulation" object that takes place of the "generateData" function, allowing front end to step through the simulation
+export { RunLO, convert_mutList_to_dict };
