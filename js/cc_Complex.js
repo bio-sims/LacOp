@@ -1,5 +1,3 @@
-
-
 class CAPcAMP {
     constructor(status) {
         if(status == "Inactive") {
@@ -15,4 +13,5 @@ class CAPcAMP {
         return this.status; // if(glucose <= 100)
     }
 }
+
 export default CAPcAMP;

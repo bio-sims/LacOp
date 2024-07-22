@@ -1,17 +1,7 @@
-// 7/9/2024
-
-/* File: GenomeInfo
-Author: Richard Charczenko
-version: 2 */
-
-// Object.keys(obj) - returns list of keys   .includes
-
 class Genome {
     constructor(mutations){
         this.mut = mutations;
         this.counter = 0;
-        // iterator counter
-        this.visited = [];
     }
     has(item){
         if(item in this.mut) {
@@ -36,7 +26,7 @@ class Genome {
         Promoter research article
         https://www.ncbi.nlm.nih.gov/pmc/articles/PMC178712/pdf/1790423.pdf
         */
-        return self.mut["ProMutation"] === null;
+        return this.mut["ProMutation"] === null;
     }
     operator(allo, lacOut, rep, glucose){
         /* Lactose operon operator, if there is no mutation within the operator
@@ -48,34 +38,15 @@ class Genome {
             Bool true or false, represents operator on or off.
         pre:
             only is affected by repressor when no mutations */
-        if(self.mut["OpMutation"] === null) {
-            for(let r in rep) {
-                if(!(r.bound(allo, lacOut, glucose))) { ///////////////
+        if(this.mut["OpMutation"] === null) {
+            for(let r of rep) {
+                if(!(r.bound(allo, lacOut, glucose))) {
                     return false;
                 }
             }
         }
         return true;
     }
-//////////////////////////////////////////
-
-    ///////////////iter
-
-
-    next(){ ////////////////////////
-        if(this.counter < length(this.mut)) {
-            ////////////////////
-        } else {
-            this.counter = 0;
-            this.visited = [];
-            /////////////////////
-        }
-    }
-
-
-
-    /// __str__ ///////////////////
-
-/////////////////////////////////////////////
 }
+
 export default Genome;

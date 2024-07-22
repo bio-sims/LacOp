@@ -1,16 +1,12 @@
-// is static used correctly here
-
-
 class Repressor {
     /* Mimics repressor protein function, but in lacop program we assume
     that the repressor protein concentration is constant. If repressor is
     unbound that is represented as the boolean True */
 
-    //is static correct to use here for class variables?
-    static repressorMut = {null: "active", "lacI-": "inactive", "lacIs": "stuck"};
+    static repressorMut = {"none": "active", "lacI-": "inactive", "lacIs": "stuck"};
 
-    constructor(mut) { 
-        this.status = this.repressorMut[mut];
+    constructor(mut) {
+        this.status = Repressor.repressorMut[mut ?? "none"] ?? "active";
     }
 
     bound(allo, Le, glu) {
@@ -18,7 +14,7 @@ class Repressor {
             return false;
         }
         if (this.status == "active") {
-            return self.conditionCheck(allo, Le, glu);
+            return this.conditionCheck(allo, Le, glu);
         }
         return true; //if(this.status == "inactive")
     }
