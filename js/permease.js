@@ -44,12 +44,12 @@ class Permease {
         this.age += 1;
         if(lacO > 1.0){
             //permease is based on a equilibrium, need to do research here
-            return [
-                lacO - permeaseMut[this.mut ?? "none"],
-                lacI + permeaseMut[this.mut ?? "none"]
-            ]
+            return {
+                lacOut: lacO - Permase.permeaseMut[this.mut ?? "none"],
+                lacIn: lacI + Permase.permeaseMut[this.mut ?? "none"]
+            }
         }
-        return [lacO, lacI];
+        return {lacOut: lacO, lacIn: lacI};
     }
 
 }
