@@ -21,22 +21,6 @@ import CAPcAMP from './cc_Complex.js';
 
 // Overarching class that controls all data from lactose operon
 class Cell {
-    /// ??? idk about this section
-    // !!!!! Depending on its use throughout the class, I suspect these variables
-    //       are independent to each object and should be FIELD members
-    //       static variables are shared by all instances of a class
-    static permEnz = []; // no var/let allowed?
-    static bgalEnz = [];
-    static archiveConditions = {"perm":[], "bgal":[], "allo":[], "lacIn":[], "lacOut":[], "glucose + galactose":[]};
-    
-    /* Note on variable time
-       - can be a value set at construction if the default of 400
-         iterations is due to very rare change
-       - if change is desired and frequent, time can be a variable limited
-         to the generateData function because it is not used elsewhere
-    */
-    static time = 0.0;
-
     // Constructor
     // Pre : PARAM mutList is a dictionary,
     //       PARAM allo is a number variable,
@@ -54,16 +38,20 @@ class Cell {
     //        FIELD rep is set to '[]' !!!!! PRONE TO CHANGE? !!!!!;
     //        FIELD CAP = CAPcAMP(PARAM capStatus) [delegate];
     constructor(mutList, allo, lacIn, lacOut, glu, capStatus = "Inactive", time = 400) {
-        this.permNum = 0;   // !!!!! NOT USED !!!!!
-        this.bgalNum = 0;   // !!!!! NOT USED !!!!!
+        this.permEnz = [];
+        this.bgalEnz = [];
+        this.archiveConditions = {"perm":[], "bgal":[], "allo":[], "lacIn":[], "lacOut":[], "glucose + galactose":[]};
+        this.time = 0.0;
+        this.permNum = 0;  // !!!!! NOT USED
+        this.bgalNum = 0;  // !!!!! NOT USED
         this.gluGal = glu;
-        this.DNA = new Genome(mutList); 
+        this.DNA = new Genome(mutList);
         this.plasmid = false;
         this.plasmid_data = null;
         this.allo = allo;
         this.lacIn = lacIn;
         this.lacOut = lacOut;
-        this.rep = []; //Repressor(self.get_mutation('RepMutation', self.DNA))
+        this.rep = []; //new Repressor(this.get_mutation('RepMutation', this.DNA))
         this.CAP = new CAPcAMP(capStatus);
     }
 
@@ -179,14 +167,14 @@ class Cell {
             if(this.get_mutation("RepMutation", this.plasmid_data) == "lacIs") {
                 return;
             }
-            const num = Math.floor(Math.random()*12) + 1;
-            if(num == 1) {
-               if (this.get_mutation("PermMutation", location) == null) {
-                   this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
-               }
-               if (this.get_mutation("BgalMutation", location) == null) {
-                   this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
-               }
+        }
+         const num = Math.floor(Math.random()*12) + 1;
+         if(num == 1) {
+            if (this.get_mutation("PermMutation", location) == null) {
+               this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
+            }
+            if (this.get_mutation("BgalMutation", location) == null) {
+               this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
             }
         }
     }
@@ -219,14 +207,10 @@ class Cell {
             this.lacIn = change["lacIn"];
         }
         for(let item in this.bgalEnz) {
-            change = item.catalyze(this.lacIn, this.allo);  // and declare let here?
-            if(change[1] == "lac") {
-                this.lacIn -= change[0];
-                this.allo += change[0];
-            } else {
-                this.allo -= change[0];
-                this.gluGal += change[0];
-            }
+            change = item.catalyze(this.lacIn, this.allo);
+            this.lacIn += change["lac"];
+            this.allo += change["allo"];
+            this.gluGal += change["gluGal"];
         }
     }
 
