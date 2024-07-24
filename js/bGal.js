@@ -30,19 +30,24 @@ class Bgal {
 
         const p = (lacIn/(allo+lacIn));
         const choice = Math.random();
-        if (this.mut == "lacZ-"){
-            return [0, "lac"];
-        }
-        if (allo < 1 && lacIn < 1){
-            return [0, "lac"];
-        }
+        let changes = {
+            "lac": 0,
+            "allo": 0,
+            "gluGal": 0
+        };
+        if (this.mut == "lacZ-" || allo < 1 && lacIn < 1){
+            return changes;
+            
         if (choice < p && lacIn > 1) {
-            return [this.Lrate(lacIn), "lac"];
+            const change = this.Lrate(lacIn);
+            changes["lac"] = change * -1;
+            changes["allo"] = change;
+        } else if(allo > 1){
+            const change = this.Arate(allo);
+            changes["allo"] = change * -1;
+            changes["gluGal"] = change;
         }
-        if(allo > 1){
-            return [this.Arate(allo), "allo"];
-        }
-        return [0, "allo"];
+        return changes;
     }
 
     // Uses the Michaelis menten equation and the current concentration of allolactose to
