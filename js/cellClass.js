@@ -13,11 +13,11 @@
    - Switch all string variables in dictioaries to ENUMs
 */
 
-import { Repressor } from './repressor';
-import { Permease } from './permease';
-import { Bgal } from './bGal';
-import { Genome } from './genomeInfo';
-import { CAPcAMP } from './cc_Complex';
+import { Repressor } from './repressor.js';
+import { Permease } from './permease.js';
+import { Bgal } from './bGal.js';
+import { Genome } from './genomeInfo.js';
+import { CAPcAMP } from './cc_Complex.js';
 
 // Overarching class that controls all data from lactose operon
 class Cell {
