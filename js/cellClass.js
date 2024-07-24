@@ -16,7 +16,7 @@
 import Repressor from './repressor.js';
 import Permease from './permease.js';
 import Bgal from './bGal.js';
-import Genome from './genomeInfo.js';
+import Genome from './GenomeInfo.js';
 import CAPcAMP from './cc_Complex.js';
 
 // Overarching class that controls all data from lactose operon
@@ -117,25 +117,24 @@ class Cell {
                     transNum = 6;
                 }
                 for(let i=0; i<transNum; i++) {
-                    for(let gene in location) {
-                        if(gene == "BgalMutation" && location.mut[gene] === null) {
+                    for(const [gene, value] of Object.entries(location.mut)) {
+                        if(gene == "BgalMutation" && value === null) {
                             if((Math.floor(Math.random() * 8) + 1) == 1) { 
                                 this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
                             }
                             this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
                         }
-                        if(gene == "PermMutation" && location.mut[gene] === null) {
+                        if(gene == "PermMutation" && value === null) {
                             this.permEnz.push(new Permease(this.get_mutation("PermMutation", location)));
-                        }
                     }
                 }
                 
             } else {
-                for(let item in location) {
-                    if(item == "BgalMutation" && location.mut[item] === null) {
+                for(const [gene, value] of Object.entries(location.mut)) {
+                    if(gene == "BgalMutation" && value === null) {
                         this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
                     }
-                    if(item == "PermMutation" && location.mut[item] === null) {
+                    if(gene == "PermMutation" && value === null) {
                         this.permEnz.push(new Permease(this.get_mutation("PermMutation", location)));
                     }
                 }
@@ -156,12 +155,11 @@ class Cell {
         for (let i = 0; i < degrade_rate; i++) {
             const num = Math.floor(Math.random() * 2) + 1;
             if(num == 1) {
-                let value = 0;
                 if(this.permEnz) {
-                    value = self.permEnz.pop(); //pops last
+                    this.permEnz.pop(); //pops last
                 }
                 if(this.bgalEnz) {
-                    value = self.bgalEnz.pop();
+                    this.bgalEnz.pop();
                 }
             }
         }
@@ -183,12 +181,12 @@ class Cell {
             }
             const num = Math.floor(Math.random()*12) + 1;
             if(num == 1) {
-                if (this.get_mutation("PermMutation", location) == null) {
-                    this.permEnz.push(new Permease(this.get_mutation("PermMutation", location)));
-                }
-                if (this.get_mutation("BgalMutation", location) == null) {
-                    this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
-                }
+               if (this.get_mutation("PermMutation", location) == null) {
+                   this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
+               }
+               if (this.get_mutation("BgalMutation", location) == null) {
+                   this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+               }
             }
         }
     }
@@ -215,10 +213,10 @@ class Cell {
         this.archiveConditions["lacIn"].push(this.lacIn);
         this.archiveConditions["lacOut"].push(this.lacOut);
         this.archiveConditions["glucose + galactose"].push(this.gluGal);
-        for(let item in this.permEnz) {
-            var change = item.rate(this.lacOut, this.lacIn);  // change to let?
-            this.lacOut = change[0];
-            this.lacIn = change[1];
+        for(let item of this.permEnz) {
+            var change = item.rate(this.lacOut, this.lacIn);
+            this.lacOut = change["lacOut"];
+            this.lacIn = change["lacIn"];
         }
         for(let item in this.bgalEnz) {
             change = item.catalyze(this.lacIn, this.allo);  // and declare let here?
