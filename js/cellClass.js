@@ -168,13 +168,13 @@ class Cell {
                 return;
             }
         }
-         const num = Math.floor(Math.random()*12) + 1;
-         if(num == 1) {
+        const num = Math.floor(Math.random()*12) + 1;
+        if(num == 1) {
             if (this.get_mutation("PermMutation", location) == null) {
-               this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
+                this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
             }
             if (this.get_mutation("BgalMutation", location) == null) {
-               this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+                this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
             }
         }
     }
@@ -206,7 +206,7 @@ class Cell {
             this.lacOut = change["lacOut"];
             this.lacIn = change["lacIn"];
         }
-        for(let item in this.bgalEnz) {
+        for(let item of this.bgalEnz) {
             change = item.catalyze(this.lacIn, this.allo);
             this.lacIn += change["lac"];
             this.allo += change["allo"];
