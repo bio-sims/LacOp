@@ -37,7 +37,7 @@ class Bgal {
         };
         if (this.mut == "lacZ-" || allo < 1 && lacIn < 1){
             return changes;
-            
+        }
         if (choice < p && lacIn > 1) {
             const change = this.Lrate(lacIn);
             changes["lac"] = change * -1;
