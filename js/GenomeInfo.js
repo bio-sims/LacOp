@@ -72,7 +72,7 @@ class Genome {
     operator(allo, lacOut, rep, glucose){
         if(this.mut["OpMutation"] === null) {
             for(let r of rep) {
-                if(!(rep[r].bound(allo, lacOut, glucose))) {
+                if(!(r.bound(allo, lacOut, glucose))) {
                     return false;
                 }
             }
