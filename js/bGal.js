@@ -4,7 +4,7 @@
      The original File was a Python file (bGal.py) hosted with Flask
      Translation By : Gina Philipose, Zachary Mullen
 */
-// Last Update : June 30th, 2024
+// Last Update : August 7th, 2024
 
 // Purpose : Define the Bgal class
 
