@@ -1,9 +1,10 @@
-// Author : 
+// Author : Richard Charczenko
 // Edited By : Gina Philipose, Rena Ahn, Zachary Mullen
-// JavaScript File : repressor.js
-//   Original File : Python
-//   Translated By : Gina Philipose
-// Last Updated : July 24th, 2024
+/* JavaScript File : repressor.js
+     The original File was a Python file (repressor.py) hosted with Flask
+     Translation By : Gina Philipose, Zachary Mullen
+*/
+// Last Updated : August 7th, 2024
 
 // Purpose : Define the Repressor class
 
@@ -12,7 +13,7 @@
 
 class Repressor {
     static repressorMut = {"none": "active", "lacI-": "inactive", "lacIs": "stuck"};
-    // !!!!! Better as a constant? - static variables can be reassigned !!!!!
+    // ??? Make a constant - static variables can be reassigned
 
     // Constructor
     // Pre : PARAM mut is a string variable
@@ -27,31 +28,28 @@ class Repressor {
     // equal to "active"
     // Utilizes Function(s)...conditionCheck
     // Pre : PARAM allo is a number variable,
-    //       PARAM Le is a ___ variable !!!!! why capitalized?
-    //       PARAM glu is a number variable
-    bound(allo, Le, glu) {
+    //       PARAM glucose is a number variable
+    bound(allo, glucose) {
         if (this.status == "stuck") {
             return false;
         }
         if (this.status == "active") {
-            return this.conditionCheck(allo, Le, glu);
+            return this.conditionCheck(allo, glucose);
         }
         return true; //if(this.status == "inactive")
     }
 
+    // <Description Missing>
     // Utilizes Function(s)...Math.random
     // Pre : PARAM allo is a number variable,
-    //       PARAM Le is a ___ variable,
-    //       PARAM glu is a number variable
-    conditionCheck(allo, Le, glu){
-        /* Work needs to be done
-           - the [S] vs bound Repressor info is needed to accurately tell if
-             rep is on or off, below is all tentative work
-        */
-        allo = allo - (glu/2);
-        const pBound = (allo / 100.0); // tentative equation
+    //       PARAM glucose is a number variable
+    conditionCheck(allo, glucose){
+        allo = allo - (glucose / 2);
+        const pBound = (allo / 100.0);
+        // Note : pBound was marked to be a tentative equation, [S] vs bound
+        //        Repressor info was requested for further improvement
         const num = Math.random();
-        return (num < pBound); // or Le > 50
+        return (num < pBound);
     }
 }
 
