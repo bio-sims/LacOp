@@ -1,11 +1,10 @@
 // Author : Richard Charczenko
 // Edited by : Gina Philipose, Rena Ahn, Zachary Mullen
 /* JavaScript File : genomeInfo.js
-     The original File was a Python file (GenomeInfo.py) hosted with Flask
+     The original File was a Python file (GenomeInfo.py, version 2) hosted with Flask
      Translation By : Gina Philipose, Zachary Mullen
 */
-// Version 2
-// Last Update : July 30th, 2024
+// Last Update : August 7th, 2024
 
 // Purpse : Define the Genome class
 
