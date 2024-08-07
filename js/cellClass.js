@@ -1,9 +1,10 @@
 // Author : Richard Charczenko
 // Edited By : Gina Philipose, Rena Ahn, Zachary Mullen
-// JavaScript file : cellClass.js
-//   Original File : Python
-//   Translated By : Gina Philipose
-// Last Update : July 24th, 2024
+/* JavaScript File : cellClass.js
+     The original File was a Python file (cellClass.py) hosted with Flask
+     Translation By : Gina Philipose, Zachary Mullen
+*/
+// Last Update : August 7th, 2024
 
 // Purpose : Define the Cell class
 
@@ -16,8 +17,8 @@
 import Repressor from './repressor.js';
 import Permease from './permease.js';
 import Bgal from './bGal.js';
-import Genome from './GenomeInfo.js';
-import CAPcAMP from './cc_Complex.js';
+import Genome from './genomeInfo.js';
+import CAPcAMP from './ccComplex.js';
 
 // Overarching class that controls all data from lactose operon
 class Cell {
@@ -25,56 +26,61 @@ class Cell {
     // Pre : PARAM mutList is a dictionary,
     //       PARAM allo is a number variable,
     //       PARAM lacIn is a number variable, PARAM lacOut is a number variable,
-    //       PARAM glu is a number variable,
+    //       PARAM glucose is a number variable,
     //       PARAM capStatus is a string variable (default = "Inactive")
-    //       PARAM time is a number variable (default = 400) !!!!! NOT USED - PARAM for later function!!!!!
-    // Post : FIELD permNum is set to '0'; FIELD bgalNum  is set to '0';
-    //        FIELD gluGal is set to PARAM glu;
+    //       PARAM time is a number variable (default = 400)
+    // Post : FIELD permEnz is a list of Permease objects;
+    //        FIELD bGalEnz is a list of Bgal objects;
+    //        FIELD archiveConditions is a dictionary storing past values;
+    //        FIELD gluGal is set to PARAM glucose;
+    //        - glucose is sufficient to represent glucose+galactose
     //        FIELD DNA is set to Genome(PARAM mutList) [delegate];
     //        FIELD plasmid is set to 'false';
-    //        FIELD pasmid_date is set to 'null';
+    //        FIELD pasmidData is set to 'null';
     //        FIELD allo is set to PARAM allo;
     //        FIELD lacIn is set to PARAM lacIn; FIELD lacOut is set to PARAM lacOut;
-    //        FIELD rep is set to '[]' !!!!! PRONE TO CHANGE? !!!!!;
+    //        FIELD rep is set to '[]';
     //        FIELD CAP = CAPcAMP(PARAM capStatus) [delegate];
-    constructor(mutList, allo, lacIn, lacOut, glu, capStatus = "Inactive", time = 400) {
+    constructor(mutList, allo, lacIn, lacOut, glucose, capStatus = "Inactive", time = 400) {
+        // Note : originally permNum and bgalNum were implemented,
+        //        initialized to '0'
         this.permEnz = [];
         this.bgalEnz = [];
         this.archiveConditions = {"perm":[], "bgal":[], "allo":[], "lacIn":[], "lacOut":[], "glucose + galactose":[]};
-        this.time = 0.0;
-        this.permNum = 0;  // !!!!! NOT USED
-        this.bgalNum = 0;  // !!!!! NOT USED
-        this.gluGal = glu;
+        this.time = time;
+        this.gluGal = glucose;
         this.DNA = new Genome(mutList);
         this.plasmid = false;
-        this.plasmid_data = null;
+        this.plasmidData = null;
         this.allo = allo;
         this.lacIn = lacIn;
         this.lacOut = lacOut;
-        this.rep = []; //new Repressor(this.get_mutation('RepMutation', this.DNA))
+        this.rep = []; // new Repressor(this.getMutation('RepMutation', this.DNA))
         this.CAP = new CAPcAMP(capStatus);
     }
 
-    // plasmid, plasmid_data Mutator
+    // plasmid, plasmidData Mutator
     // Updates the class with sequence data for a plasmid
-    // Pre : PARAM plasmid_Mut is a ___ variable
-    // Post : FIELD plasmid_data is set to Genome(PARAM plasmid_Mut);
+    // Pre : PARAM plasmidMutations is a dictionary
+    // Post : FIELD plasmidData is set to Genome(PARAM plasmidMutations);
     //        FIELD plasmid is set to 'true'
-    add_plasmid(plasmid_Mut) {
-        this.plasmid_data = new Genome(plasmid_Mut);
+    addPlasmid(plasmidMutations) {
+        this.plasmidData = new Genome(plasmidMutations);
         this.plasmid = true;
     }
 
     // Helper Function to translate, backgroundTranscription, generateData
     // Retrieves mutation from genome object, checks both DNA genome object and
     // plasmid genome object
-    // Returns gene_data (location.mut[mutation])
-    // Pre : PARAM mutation is a string variable,
-    //       PARAM location is a Genome object
+    // Returns geneData (chromOrPlasmid.mutations[mut])
+    // Pre : PARAM mut is a string variable,
+    //       PARAM chromOrPlasmid is a Genome object
+    //       - suspected to be on a chromosome (equal to this.DNA) or on a
+    //         plasmid (??? comparison to this.plasmidData)
     // Post : none
-    get_mutation(mutation, location) {
-        const gene_data = location.mut[mutation];
-        return gene_data;
+    getMutation(mut, chromOrPlasmid) {
+        const geneData = chromOrPlasmid.mutations[mut];
+        return geneData;
     }
 
     // <Description Missing>
@@ -82,7 +88,7 @@ class Cell {
     // Post : FIELD allo is incremented by '2' if FIELD lacOut is greater than
     //        50 and FIELD DNA.mut["PermMutation"] is 'null'     
     signal() {
-        if(this.lacOut > 50 && this.DNA.mut["PermMutation"]===null) {
+        if(this.lacOut > 50 && this.DNA.mutations["PermMutation"] === null) {
             this.allo += 2;
         }
     }
@@ -90,59 +96,63 @@ class Cell {
     // Increases the amount of enzyme class objects (the number of new objects
     // vary based on whether the CAPcAMP complex is active or not active)
     // The previous number of objects is recorded to be used in graph data
-    // Utilizes Function(s)...<location class>.transcribe, get_mutation, CAPcAMP.get_status,
+    // Utilizes Function(s)...Genome.transcribe, getMutation, CAPcAMP.getStatus,
     //                        Math.random
-    // Pre : location is a Genome object
-    // Post : Bgal(get_mutation("BgalMutation", PARM location)) objects are
-    //        appended to FIELD? bgalEnz as appropriate
-    //        Permease(get_mutation("PermMutation", PARM location)) objects are
-    //        appended to FIELD? permEnz as appropriate
-    translate(location){
-        if(location.transcribe(this.allo, this.lacOut, this.rep, this.gluGal)) {
-            if(location == this.DNA){
-                let transNum = 1;
-                if(this.CAP.get_status(this.gluGal)){
+    // Pre : chromOrPlasmid is a Genome object
+    //       - suspected to be on a chromosome (equal to this.DNA) or on a
+    //         plasmid (??? comparison to this.plasmidData)
+    // Post : Bgal(getMutation("BgalMutation", PARAM chromOrPlasmid)) objects
+    //        are appended to FIELD bgalEnz as appropriate;
+    //        Permease(getMutation("PermMutation", PARAM chromOrPlasmid))
+    //        objects are appended to FIELD permEnz as appropriate
+    translate(chromOrPlasmid) {
+        if(chromOrPlasmid.transcribe(this.allo, this.lacOut, this.rep, this.gluGal)) {
+            if(chromOrPlasmid == this.DNA) {
+                var transNum = 1;
+                if(this.CAP.getStatus(this.gluGal)) {
                     transNum = 6;
                 }
                 for(let i=0; i<transNum; i++) {
-                    for(const [gene, value] of Object.entries(location.mut)) {
+                    for(const [gene, value] of Object.entries(chromOrPlasmid.mutations)) {
                         if(gene == "BgalMutation" && value === null) {
                             if((Math.floor(Math.random() * 8) + 1) == 1) { 
-                                this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+                                this.bgalEnz.push(new Bgal(this.getMutation("BgalMutation", chromOrPlasmid)));
                             }
-                            this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+                            this.bgalEnz.push(new Bgal(this.getMutation("BgalMutation", chromOrPlasmid)));
                         }
                         if(gene == "PermMutation" && value === null) {
-                            this.permEnz.push(new Permease(this.get_mutation("PermMutation", location)));
+                            this.permEnz.push(new Permease(this.getMutation("PermMutation", chromOrPlasmid)));
+                        }
                     }
                 }
-                
             } else {
-                for(const [gene, value] of Object.entries(location.mut)) {
+                for(const [gene, value] of Object.entries(chromOrPlasmid.mutations)) {
                     if(gene == "BgalMutation" && value === null) {
-                        this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+                        this.bgalEnz.push(new Bgal(this.getMutation("BgalMutation", chromOrPlasmid)));
                     }
                     if(gene == "PermMutation" && value === null) {
-                        this.permEnz.push(new Permease(this.get_mutation("PermMutation", location)));
+                        this.permEnz.push(new Permease(this.getMutation("PermMutation", chromOrPlasmid)));
                     }
                 }
             }
         }
-
     }
 
-    // !!!!! Purpose of Function is Unknown !!!!!
     // Mimics degradation lactose operon proteins
+    // Utilizes Function(s)...Math.random
     // Pre : none
     // Post : the last element of FIELD permEnz and FIELD bgalEnz is removed
-    degrade() { //// what is the purpose of this?? -> value isn't even used
-        let degrade_rate = (this.permEnz.length + this.bgalEnz.length) / 10;
-        if(degrade_rate == 0) {
-            degrade_rate == 1;
+    degrade() {
+        let degradeRate = (this.permEnz.length + this.bgalEnz.length) / 10;
+        if(degradeRate == 0) {
+            degradeRate == 1;
         }
-        for (let i = 0; i < degrade_rate; i++) {
+        for (let i = 0; i < degradeRate; i++) {
             const num = Math.floor(Math.random() * 2) + 1;
             if(num == 1) {
+                // Note : originally a 'value' variable, initialized to 0, held
+                //        the values popped by FIELD permEnz and FIELD bgalEnz;
+                //        purpose is unknown
                 if(this.permEnz) {
                     this.permEnz.pop(); //pops last
                 }
@@ -155,26 +165,29 @@ class Cell {
 
     // Creates small amounts of protein
     // Biologically occurs even if the lac operon is being regulated
-    // Utilizes Function(s)...get_mutation, Math.random
-    // Pre : location is a Genome object
+    // Utilizes Function(s)...getMutation, Math.random
+    // Pre : chromOrPlasmid is a Genome object
+    //       - suspected to be on a chromosome (equal to this.DNA) or on a
+    //         plasmid (??? comparison to this.plasmidData)
     // Post : a Permease object is added to FIELD permEnz;
     //        a Bgal object is added to FIELD bgalEnz
-    backgroundTranscription(location) {
-        if(this.get_mutation("RepMutation", this.DNA) == "lacIs") {
+    backgroundTranscription(chromOrPlasmid) {
+        if(this.getMutation("RepMutation", this.DNA) == "lacIs") {
             return;
         }
         if(this.plasmid) {
-            if(this.get_mutation("RepMutation", this.plasmid_data) == "lacIs") {
+            if(this.getMutation("RepMutation", this.plasmidData) == "lacIs") {
                 return;
             }
         }
+        
         const num = Math.floor(Math.random()*12) + 1;
         if(num == 1) {
-            if (this.get_mutation("PermMutation", location) == null) {
-                this.permEnz.push(new Permase(this.get_mutation("PermMutation", location)));
+            if (this.getMutation("PermMutation", chromOrPlasmid) == null) {
+                this.permEnz.push(new Permease(this.getMutation("PermMutation", chromOrPlasmid)));
             }
-            if (this.get_mutation("BgalMutation", location) == null) {
-                this.bgalEnz.push(new Bgal(this.get_mutation("BgalMutation", location)));
+            if (this.getMutation("BgalMutation", chromOrPlasmid) == null) {
+                this.bgalEnz.push(new Bgal(this.getMutation("BgalMutation", chromOrPlasmid)));
             }
         }
     }
@@ -184,18 +197,15 @@ class Cell {
     // Pre : none
     // Post : the current values of FIELD allo, FIELD lacIn, FIELD lacOut, and
     //        FIELD gluGal are added to FIELD archiveConditions;
-    //        FIELD lacOut is set according to the first value returned by
+    //        FIELD lacOut is set according to the "lacOut" value returned by
     //        Permease.rate with the last Permease object in FIELD permEnz;
-    //        FIELD lacIn is set according to the second value returned by
-    //        Permease.rate with the last Permease object in FIELD permEnz and,
-    //        when the second values returned by Bgal.catalyze calls are "lac",
-    //        decremented by each first value returned by the call;
-    //        FIELD allo, when the second values returned by Bgal.catalyze calls
-    //        are "lac", is incremented by each first value returned by the call
-    //        and, when the second values returned by Bgal.catalyze are "allo",
-    //        is decremented by each first value returned by the call;
-    //        FIELD gluGal, when the second values returned by Bgal.catalyze calls
-    //        are "allo", is incremented by each first value returned by the call
+    //        FIELD lacIn is set according to the "lacIn" value returned by
+    //        Permease.rate with the last Permease object in FIELD permEnz;
+    //        Then, for each Bgal.catalyze call (one for each item in FIELD bgalEnz)...
+    //          (1) the newly set FIELD lacIn is incremented by the returned
+    //              "lac" values,
+    //          (2) FIELD allo is incremented by the returned "allo" values, and
+    //          (3) FIELD gluGal is incremented by the returned "gluGal" values
     activeEnzymes() {
         this.archiveConditions["allo"].push(this.allo);
         this.archiveConditions["lacIn"].push(this.lacIn);
@@ -222,57 +232,58 @@ class Cell {
     //        FIELD lacOut is decremented by '0.2', and
     //        FIELD lacIn is incremented by '0.2'
     backGroundTransport() {
-        if(this.lacIn > 0 && this.lacOut > 0) {   // !!!!! condition necessary?
-            const num = Math.floor(Math.random()*3) + 1;
-            if(num == 1 && this.lacOut > 1.0) {
-                this.lacOut -= 0.2;
-                this.lacIn += 0.2;
-            }
+        const num = Math.floor(Math.random()*3) + 1;
+        if(num == 1 && this.lacIn > 0 && this.lacOut > 1.0) {
+            this.lacOut -= 0.2;
+            this.lacIn += 0.2;
         }
     }
 
     // Generates data used in graphical output
     // Essentially a driver for the cell class that runs the cell object for
     // a default of 400 iterations ~main function
-    // Utilizes Function(s)...get_mutation, translate, backgroundTranscription,
-    //                        activeEnzymes, backgroundTransport
-    // Pre : PARAM time is a number variable
+    // Utilizes Function(s)...getMutation, translate, backgroundTranscription,
+    //                        Genome.transcribe, degrade, activeEnzymes,
+    //                        backgroundTransport, Math.random
+    // Pre : none
     // Post : cell activity is simulated for a default of 400 iterations
-    generateData(time = 400.0) {
+    generateData() {
         // resetting field values
         this.permEnz = [];
         this.bgalEnz = [];
         this.archiveConditions = {"perm":[], "bgal":[],
                                  "allo":[], "lacIn":[],
                                  "lacOut":[], "glucose + galactose":[]};
-        this.time = 0;
-        while(this.time < time) { // 400 is a the arviturary time set for the simulation to run
+        // simulating activity
+        let counter = 0;
+        while(counter < this.time) {
             this.archiveConditions["perm"].push(this.permEnz.length);
             this.archiveConditions["bgal"].push(this.bgalEnz.length);
             // repressor
-            this.rep.push(new Repressor(this.get_mutation("RepMutation", this.DNA)))
-            if (this.plasmid && this.plasmid_data.has("RepMutation")) {
-                this.rep.push(new Repressor(this.get_mutation("RepMutation", this.plasmid_data)));
+            this.rep.push(new Repressor(this.getMutation("RepMutation", this.DNA)))
+            if (this.plasmid && this.plasmidData.has("RepMutation")) {
+                this.rep.push(new Repressor(this.getMutation("RepMutation", this.plasmidData)));
             }
             // translation
             this.translate(this.DNA)
             if(this.plasmid) { 
-                this.translate(this.plasmid_data);
-                if(this.get_mutation("ProMutation", this.plasmid_data) === null) {
-                    this.backgroundTranscription(this.plasmid_data);
+                this.translate(this.plasmidData);
+                if(this.getMutation("ProMutation", this.plasmidData) === null) {
+                    this.backgroundTranscription(this.plasmidData);
                 }
             }
-            if(this.get_mutation("ProMutation", this.DNA) === null) {
+            if(this.getMutation("ProMutation", this.DNA) === null) {
                 this.backgroundTranscription(this.DNA);
             }
-            // degradataion 
-            if(this.lacOut + this.lacIn + this.allo < (Math.floor(Math.random()*51)) && !(this.DNA.transcribe(this.allo, this.lacOut, this.rep, this.gluGal))) { /////fix random + "and not"
+            // degradataion
+            if((this.lacOut + this.lacIn + this.allo) < (Math.floor(Math.random() * 51))
+               && !(this.DNA.transcribe(this.allo, this.lacOut, this.rep, this.gluGal))) {
                 this.degrade();
             }
             // enzyme activity
             this.activeEnzymes();
             this.backGroundTransport();
-            this.time = this.time + 1;
+            counter = counter + 1;
         }
     }
 }
