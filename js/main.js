@@ -1,7 +1,13 @@
-import { RunLO } from "./LacOp.js";
+// Author : Gina Philipose, Zachary Mullen
+// JavaScript File : main.js
+// Last Update : August 7th, 2024
+
+// Purpose : Driver file for the LacOp project/simulation
+
+import { runLO } from "./lacop.js";
 
 // temp, delete all below later
-const simCell = RunLO(['noneP', 'ALLO', 'LO', 'noneZ', 'noneY', 'LI', 'GLU', 'Inactive', 'noneO', 'noneI'], [], 0, 0, 200, 0);
+const simCell = runLO(['noneP', 'ALLO', 'LO', 'noneZ', 'noneY', 'LI', 'GLU', 'Inactive', 'noneO', 'noneI'], [], 0, 0, 200, 0); // Cell object
 const timeTable = document.getElementById("temp-table");
 // insert row for each time point
 for (let i = 0; i < simCell.time; i++) {
